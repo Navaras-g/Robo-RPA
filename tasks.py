@@ -121,7 +121,7 @@ def embed_screenshot_to_receipt(screenshot, pdf_file):
     """embeds the robot screenshot to the pdf file"""
     pdf = PDF()
 
-    pdf.add_files_to_pdf(files=[pdf_file, screenshot], target_document=pdf_file)
+    pdf.add_watermark_image_to_pdf(image_path=screenshot, source_path= pdf_file, output_path= pdf_file)
 
 
 def archive_receipts():
