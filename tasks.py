@@ -23,6 +23,12 @@ def order_robots_from_RobotSpareBin():
         fill_the_form(order)
         preview_the_robot()
         submit_order()
+
+        pdf_file = store_receipt_as_pdf(order["Order number"])
+        screenshot = screenshot_robot(order["Order number"])
+        embed_screenshot_to_receipt(screenshot, pdf_file)
+
+        order_another_robot()
     
 
 
@@ -88,3 +94,31 @@ def order_another_robot():
 
     page = browser.page()
     page.click("#order-another")
+
+
+def store_receipt_as_pdf(order_number):
+    """stores the order receipt as pdf"""
+    page = browser.page()
+
+    receipt_html = page.locator("#receipt").inner_html()
+
+    pdf = PDF()
+    pdf_path = f"output/receipts/order_{order_number}.pdf"
+    pdf.html_to_pdf(receipt_html, pdf_path)
+    return pdf_path
+
+
+def screenshot_robot(order_number):
+    """take the screenshot of the page"""
+    page = browser.page()
+
+    screenshot_path = f"output/screenshots/robot_{order_number}.png"
+    page.locator("#robot-preview-image").screenshot(path=screenshot_path)
+    return screenshot_path
+
+
+def embed_screenshot_to_receipt(screenshot, pdf_file):
+    """embeds the robot screenshot to the pdf file"""
+    pdf = PDF()
+
+    pdf.add_files_to_pdf(files = [pdf_file, screenshot], target_document= pdf_file)
