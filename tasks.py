@@ -15,6 +15,14 @@ def order_robots_from_RobotSpareBin():
     Creates ZIP archive of the receipts and the images.
     """
     open_robot_Order_website()
+    download_csv_file()
+    orders = get_orders()
+
+    for order in orders:
+        close_annoying_model()
+        fill_the_form(order)
+        preview_the_robot()
+        submit_order()
     
 
 
@@ -30,16 +38,53 @@ def download_csv_file():
 
 
 def get_orders():
-    """read the csv file into tables that can be looped"""
+    """read the csv file into tables and return the result """
     tables = Tables()
-    tables.read_table_from_csv("order.csv", header=True)
+    return tables.read_table_from_csv("orders.csv", header=True)
 
 
 def close_annoying_model():
     """closes the annoying pop up when visiting the order website"""
+    page = browser.page()
+    page.click("button:text('OK)")
 
-
-def fill_the_form():
+def fill_the_form(order):
     """fill the order form to order the robot"""
+    page = browser.page()
+
+    page.select_option("#head", str(order["Head"]))
+    
+    page.click(f"#id-body-{order['Body']}")
+    
+    page.fill("input[placeholder='Enter number for legs']", str(order["Legs"]))
+    
+    page.fill("#address", str(order["Address"]))
+    
+    page.click("#preview")
+
+    page.click("#order")
 
 
+def preview_the_robot():
+    """preview to see how the robot looks like"""
+    page = browser.page()
+    page.click("#preview")
+
+
+def submit_order():
+    """submit the user order and retries if there is an error"""
+    page = browser.page()
+
+    while True:
+        page.click("#order")
+        receipt = page.query_selector("#receipt")
+
+        if receipt:
+            break
+
+
+def order_another_robot():
+    """orders another robot for the next user"""
+
+    page = browser.page()
+    page.click("#order-another")
