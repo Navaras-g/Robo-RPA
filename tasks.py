@@ -1,8 +1,10 @@
+import os
 from robocorp.tasks import task
 from robocorp  import browser
 from RPA.HTTP import HTTP
 from RPA.Tables import Tables
 from RPA.PDF import PDF
+from RPA.Archive import Archive
 
 
 @task
@@ -14,6 +16,9 @@ def order_robots_from_RobotSpareBin():
     Embeds the screenshot of the robot to the PDF receipt.
     Creates ZIP archive of the receipts and the images.
     """
+    os.makedirs("output/receipts", exist_ok=True)
+    os.makedirs("output/screenshots", exist_ok=True)
+
     open_robot_Order_website()
     download_csv_file()
     orders = get_orders()
@@ -29,7 +34,8 @@ def order_robots_from_RobotSpareBin():
         embed_screenshot_to_receipt(screenshot, pdf_file)
 
         order_another_robot()
-    
+
+    archive_receipts()
 
 
 def open_robot_Order_website():
@@ -40,7 +46,7 @@ def open_robot_Order_website():
 def download_csv_file():
     """downloads the order file"""
     http = HTTP()
-    http.download(url="https://robotsparebinindustries.com/orders.csv", overwrite= True)
+    http.download(url="https://robotsparebinindustries.com/orders.csv", target_file="orders.csv", overwrite=True)
 
 
 def get_orders():
@@ -52,23 +58,17 @@ def get_orders():
 def close_annoying_model():
     """closes the annoying pop up when visiting the order website"""
     page = browser.page()
-    page.click("button:text('OK)")
+    page.click("button:has-text('OK')")
+
 
 def fill_the_form(order):
     """fill the order form to order the robot"""
     page = browser.page()
 
     page.select_option("#head", str(order["Head"]))
-    
     page.click(f"#id-body-{order['Body']}")
-    
-    page.fill("input[placeholder='Enter number for legs']", str(order["Legs"]))
-    
+    page.fill("input[placeholder='Enter the part number for the legs']", str(order["Legs"]))
     page.fill("#address", str(order["Address"]))
-    
-    page.click("#preview")
-
-    page.click("#order")
 
 
 def preview_the_robot():
@@ -121,4 +121,10 @@ def embed_screenshot_to_receipt(screenshot, pdf_file):
     """embeds the robot screenshot to the pdf file"""
     pdf = PDF()
 
-    pdf.add_files_to_pdf(files = [pdf_file, screenshot], target_document= pdf_file)
+    pdf.add_files_to_pdf(files=[pdf_file, screenshot], target_document=pdf_file)
+
+
+def archive_receipts():
+    """archives all PDF receipts into a ZIP file"""
+    archive = Archive()
+    archive.archive_folder_with_zip("output/receipts", "output/receipts.zip")
