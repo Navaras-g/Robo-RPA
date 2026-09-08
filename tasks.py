@@ -1,7 +1,7 @@
 from robocorp.tasks import task
 from robocorp  import browser
 from RPA.HTTP import HTTP
-from RPA.Excel.Files import Files
+from RPA.Tables import Tables
 from RPA.PDF import PDF
 
 
@@ -27,5 +27,19 @@ def download_csv_file():
     """downloads the order file"""
     http = HTTP()
     http.download(url="https://robotsparebinindustries.com/orders.csv", overwrite= True)
+
+
+def get_orders():
+    """read the csv file into tables that can be looped"""
+    tables = Tables()
+    tables.read_table_from_csv("order.csv", header=True)
+
+
+def close_annoying_model():
+    """closes the annoying pop up when visiting the order website"""
+
+
+def fill_the_form():
+    """fill the order form to order the robot"""
 
 
